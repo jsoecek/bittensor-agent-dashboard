@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bittensor Agent Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-gray-100 p-6">
+  <h1 class="text-3xl font-bold mb-4">Bittensor Subnet Agent Dashboard</h1>
+  <input id="search" type="text" placeholder="Hledat subnet..." class="border p-2 rounded-md mb-4 w-full max-w-sm" />
+  <div id="cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+  <script type="module">
+    import React, { useState, useEffect } from 'https://esm.sh/react';
+    import ReactDOM from 'https://esm.sh/react-dom';
+    import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'https://esm.sh/recharts';
+
+    const dataAPI = [
+      {
+        subnet: 'SN 14',
+        pattern: 'Falling wedge',
+        rsi: 32,
+        price: 40.7,
+        volume: 5400000,
+        sentiment: 'Neutral',
+        sparkline: [
+          { time: '2025-06-05', price: 38.9 },
+          { time: '2025-06-06', price: 39.2 },
+          { time: '2025-06-07', price: 39.8 },
+          { time: '2025-06-08', price: 40.4 },
+          { time: '2025-06-09', price: 40.7 }
+        ]
+      },
+      {
+        subnet: 'SN 64',
+        pattern: 'Double bottom',
+        rsi: 29,
+        price: 92.1,
+        volume: 7500000,
+        sentiment: 'Greed',
+        sparkline: [
+          { time: '2025-06-05', price: 88.0 },
+          { time: '2025-06-06', price: 89.3 },
+          { time: '2025-06-07', price: 90.5 },
+          { time: '2025-06-08', price: 91.7 },
+          { time: '2025-06-09', price: 92.1 }
+        ]
+      }
+    ];
+
+    function Dashboard() {
+      const [data, setData] = useState(dataAPI);
+      const [filtered, setFiltered] = useState(dataAPI);
+
+      useEffect(() => {
+        const input = document.getElementById('search');
+        input.addEventListener('input', (e) => {
+          const q = e.target.value.toLowerCase();
+          setFiltered(data.filter(item => item.subnet.toLowerCase().includes(q)));
+        });
+      }, [data]);
+
+      return React.createElement('div', {}, filtered.map(subnet =>
+        React.createElement('div', { key: subnet.subnet, className: 'bg-white p-4 rounded-lg shadow' },
+          React.createElement('h2', { className: 'text-xl font-semibold' }, subnet.subnet),
+          React.createElement('p', null, 'Pattern: ', React.createElement('strong', null, subnet.pattern)),
+          React.createElement('p', null, 'RSI: ', React.createElement('strong', null, subnet.rsi)),
+          React.createElement('p', null, 'Cena: ', React.createElement('strong', null, subnet.price.toFixed(2) + ' USD')),
+          React.createElement('p', null, 'Objem: ', React.createElement('strong', null, subnet.volume.toLocaleString() + ' USD')),
+          React.createElement('p', null, 'Sentiment: ', React.createElement('strong', null, subnet.sentiment)),
+          React.createElement('div', { style: { width: '100%', height: 128 } },
+            React.createElement(ResponsiveContainer, { width: '100%', height: '100%' },
+              React.createElement(LineChart, { data: subnet.sparkline },
+                React.createElement(XAxis, { dataKey: 'time', hide: true }),
+                React.createElement(YAxis, { hide: true, domain: ['auto', 'auto'] }),
+                React.createElement(Tooltip, null),
+                React.createElement(Line, { type: 'monotone', dataKey: 'price', dot: false })
+              )
+            )
+          )
+        )
+      ));
+    }
+
+    ReactDOM.render(
+      React.createElement(Dashboard),
+      document.getElementById('cards')
+    );
+  </script>
+</body>
+</html>
